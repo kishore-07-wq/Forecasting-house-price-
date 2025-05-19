@@ -56,3 +56,54 @@ r2 = r2_score(y_test, y_pred)
 print(f"Best XGBoost Model: {grid.best_params_}")
 print(f"RMSE: {rmse:.2f}")
 print(f"R² Score: {r2:.4f}")
+
+ Import libraries
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import mean_squared_error, r2_score
+from xgboost import XGBRegressor
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Load dataset (e.g., from Kaggle's House Prices dataset)
+data = pd.read_csv('house_prices.csv')
+
+# Preprocess data
+# Handle missing values
+data.fillna(data.mean(), inplace=True)
+
+# Encode categorical variables
+data = pd.get_dummies(data, drop_first=True)
+
+# Feature and target selection
+X = data.drop(['SalePrice'], axis=1)
+y = data['SalePrice']
+
+# Feature scaling
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Train-test split
+X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
+
+# Smart regression model: XGBoost
+model = XGBRegressor(n_estimators=100, learning_rate=0.1, max_depth=5, random_state=42)
+model.fit(X_train, y_train)
+
+# Predict and evaluate
+y_pred = model.predict(X_test)
+mse = mean_squared_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+
+print("Mean Squared Error:", mse)
+print("R^2 Score:", r2)
+
+# Plot predictions
+plt.figure(figsize=(10, 6))
+sns.scatterplot(x=y_test, y=y_pred)
+plt.xlabel("Actual Price")
+plt.ylabel("Predicted Price")
+plt.title("Actual vs Predicted House Prices")
+plt.show()
